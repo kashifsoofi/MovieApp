@@ -1,0 +1,29 @@
+﻿<!DOCTYPE html>
+<html ng-app="moviesApp">
+<head>
+    <meta charset="utf-8" />
+    <title>Movies</title>
+
+    <script src="lib/angular/angular.min.js"></script>
+    <script src="lib/angular-resource/angular-resource.min.js"></script>
+    <script src="app.js"></script>
+</head>
+<body ng-cloak>
+    <div ng-controller="moviesController">
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Director</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="movie in movies">
+                    <td>{{movie.Title}}</td>
+                    <td>{{movie.Director}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
