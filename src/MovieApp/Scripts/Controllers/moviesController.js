@@ -3,11 +3,52 @@
 
     angular
         .module('moviesApp')
-        .controller('moviesController', moviesController);
+        .controller('MoviesListController', MoviesListController)
+        .controller('MoviesAddController', MoviesAddController)
+        .controller('MoviesEditController', MoviesEditController)
+        .controller('MoviesDeleteController', MoviesDeleteController);
 
-    moviesController.$inject = ['$scope', 'Movies']; 
+    /* Movies List Controller  */
+    MoviesListController.$inject = ['$scope', 'Movies']; 
 
-    function moviesController($scope, Movies) {
+    function MoviesListController($scope, Movies) {
         $scope.movies = Movies.query();
     }
+    
+    /* Movies Create Controller */
+    MoviesAddController.$inject = ['$scope', '$location', 'Movies'];
+    
+    function MoviesAddController($scope, $location, Movies) {
+        $scope.movie = new Movie();
+        $scope.add = function () {
+            $scope.movie.$save(function() {
+                $location.path('/');
+            });
+        }
+    }
+    
+    /* Movies Edit Controller */
+    MoviesEditController.$inject = ['$scope', '$routeParams', '$location', 'Movies'];
+    
+    function MoviesEditController($scope, $routeParams, $location, Movies) {
+        $scope.movie = Movies.get({ id: $routeParams.id });
+        $scope.edit = function () {
+            $scope.movie.$save(function () {
+                $location.path('/');
+            });
+        };
+    }
+    
+    /* Movies Delete Controller  */
+    MoviesDeleteController.$inject = ['$scope', '$routeParams', '$location', 'Movie'];
+ 
+    function MoviesDeleteController($scope, $routeParams, $location, Movies) {
+        $scope.movie = Movies.get({ id: $routeParams.id });
+        $scope.remove = function () {
+            $scope.movie.$remove({id:$scope.movie.Id}, function () {
+                $location.path('/');
+            });
+        };
+    }
+    
 })();
