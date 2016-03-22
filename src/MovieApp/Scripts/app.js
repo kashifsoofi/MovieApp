@@ -8,7 +8,7 @@
     ]).config(config);
     
     function config($routeProvider, $locationProvider) {
-        $routeProvider        
+        $routeProvider
             .when('/', {
                 templateUrl: '/Views/list.html',
                 controller: 'MoviesListController'

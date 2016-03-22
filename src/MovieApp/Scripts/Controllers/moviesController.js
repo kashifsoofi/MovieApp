@@ -40,7 +40,7 @@
     }
     
     /* Movies Delete Controller  */
-    MoviesDeleteController.$inject = ['$scope', '$routeParams', '$location', 'Movie'];
+    MoviesDeleteController.$inject = ['$scope', '$routeParams', '$location', 'Movies'];
  
     function MoviesDeleteController($scope, $routeParams, $location, Movies) {
         $scope.movie = Movies.get({ id: $routeParams.id });

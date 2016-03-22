@@ -22,5 +22,28 @@ namespace MovieApp.Controllers.Api
                 new Movie {Id=3, Title="Memento", Director="Nolan"}
             };
         }
+
+        [HttpGet("{id:int}")]
+        public IActionResult Get(int id)
+        {
+            return new ObjectResult(new Movie
+            {
+                Id = 1,
+                Title = "Star Wars",
+                Director = "Lucas"
+            });
+        }
+
+        [HttpPost]
+        public IActionResult Post([FromBody]Movie movie)
+        {
+            return new ObjectResult(movie);
+        }
+
+        [HttpDelete("{id:int}")]
+        public IActionResult Delete(int id)
+        {
+            return new HttpStatusCodeResult(200);
+        }
     }
 }
