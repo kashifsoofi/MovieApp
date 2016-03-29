@@ -37,7 +37,6 @@ namespace MovieApp
         {
             app.UseDefaultFiles();
             app.UseStaticFiles();
-            app.UseDefaultFiles();
             //app.UseIISPlatformHandler();
 
             // Add MVC to the request pipeline.
