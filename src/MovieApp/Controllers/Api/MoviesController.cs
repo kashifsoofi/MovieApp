@@ -42,20 +42,24 @@ namespace MovieApp.Controllers.Api
         [HttpPost]
         public IActionResult Post([FromBody]Movie movie)
         {
-            if (movie.Id == 0)
+            if (ModelState.IsValid)
             {
-                _dbContext.Movies.Add(movie);
-                _dbContext.SaveChanges();
-                return new ObjectResult(movie);
+                if (movie.Id == 0)
+                {
+                    _dbContext.Movies.Add(movie);
+                    _dbContext.SaveChanges();
+                    return new ObjectResult(movie);
+                }
+                else
+                {
+                    var original = _dbContext.Movies.FirstOrDefault(m => m.Id == movie.Id);
+                    original.Title = movie.Title;
+                    original.Director = movie.Director;
+                    _dbContext.SaveChanges();
+                    return new ObjectResult(original);
+                }
             }
-            else
-            {
-                var original = _dbContext.Movies.FirstOrDefault(m => m.Id == movie.Id);
-                original.Title = movie.Title;
-                original.Director = movie.Director;
-                _dbContext.SaveChanges();
-                return new ObjectResult(original);
-            }
+            return new BadRequestObjectResult(ModelState);
         }
 
         [HttpDelete("{id:int}")]

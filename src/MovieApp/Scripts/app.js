@@ -4,7 +4,7 @@
     config.$inject = ['$routeProvider', '$locationProvider'];   
 
     angular.module('moviesApp', [
-        'ngRoute', 'moviesServices'
+        'ngRoute', 'ui.bootstrap', 'moviesServices'
     ]).config(config);
     
     function config($routeProvider, $locationProvider) {
