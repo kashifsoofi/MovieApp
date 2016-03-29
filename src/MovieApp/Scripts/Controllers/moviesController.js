@@ -10,9 +10,10 @@
         .controller('DatePickerController', DatePickerController);
 
     /* Movies List Controller  */
-    MoviesListController.$inject = ['$scope', 'Movie']; 
+    MoviesListController.$inject = ['$scope', 'Movie', 'canEdit']; 
 
-    function MoviesListController($scope, Movie) {
+    function MoviesListController($scope, Movie, canEdit) {
+        $scope.canEdit = canEdit;
         $scope.movies = Movie.query();
     }
     

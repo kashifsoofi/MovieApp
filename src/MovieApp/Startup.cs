@@ -1,15 +1,21 @@
 ﻿using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.Data.Entity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MovieApp.Models;
+using System;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace MovieApp
 {
     public class Startup
     {
-        public static IConfigurationRoot Configuration { get; set; }
+        public static IConfiguration Configuration { get; set; }
 
         public Startup(IHostingEnvironment env)
         {
@@ -29,6 +35,10 @@ namespace MovieApp
                 .AddSqlServer()
                 .AddDbContext<MovieAppContext>(options => options.UseSqlServer(Configuration["Data:DefaultConnection:ConnectionString"]));
 
+            // Add ASP.NET Identity
+            services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<MovieAppContext>();
+
             services.AddMvc();
         }
 
@@ -38,6 +48,8 @@ namespace MovieApp
             app.UseDefaultFiles();
             app.UseStaticFiles();
             //app.UseIISPlatformHandler();
+
+            app.UseIdentity();
 
             // Add MVC to the request pipeline.
             app.UseMvc();
@@ -50,6 +62,49 @@ namespace MovieApp
             //    // Uncomment the following line to add a route for porting Web API 2 controllers.
             //    // routes.MapWebApiRoute("DefaultApi", "api/{controller}/{id?}");
             //});
+            CreateSampleData(app.ApplicationServices).Wait();
+        }
+
+        private static async Task CreateSampleData(IServiceProvider applicationServices)
+        {
+            using (var dbContext = applicationServices.GetService<MovieAppContext>())
+            {
+                var sqlServerDatabase = dbContext.Database;
+                if (sqlServerDatabase != null)
+                {
+                    // Create database in user root (c:\users\your name)
+                    if (await sqlServerDatabase.EnsureCreatedAsync())
+                    {
+                        // add some movies
+                        var movies = new List<Movie>
+                        {
+                            new Movie {Title="Star Wars", Director="Lucas"},
+                            new Movie {Title="King Kong", Director="Jackson"},
+                            new Movie {Title="Memento", Director="Nolan"}
+                        };
+                        movies.ForEach(m => dbContext.Movies.Add(m));
+
+                        // add some users
+                        var userManager = applicationServices.GetService<UserManager<ApplicationUser>>();
+
+                        // add editor user
+                        var stephen = new ApplicationUser
+                        {
+                            UserName = "Admin"
+                        };
+                        var result = await userManager.CreateAsync(stephen, "P@ssw0rd");
+                        await userManager.AddClaimAsync(stephen, new Claim("CanEdit", "true"));
+
+                        // add normal user
+                        var bob = new ApplicationUser
+                        {
+                            UserName = "Viewer"
+                        };
+                        await userManager.CreateAsync(bob, "P@ssw0rd");
+                    }
+
+                }
+            }
         }
 
         // Entry point for the application.
