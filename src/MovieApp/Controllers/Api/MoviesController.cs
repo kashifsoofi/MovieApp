@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Mvc;
 using MovieApp.Models;
+using Microsoft.AspNet.Authorization;
 
 // For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -39,6 +40,7 @@ namespace MovieApp.Controllers.Api
             }
         }
 
+        [Authorize(Policy = "CanEdit")]
         [HttpPost]
         public IActionResult Post([FromBody]Movie movie)
         {
@@ -62,6 +64,7 @@ namespace MovieApp.Controllers.Api
             return new BadRequestObjectResult(ModelState);
         }
 
+        [Authorize(Policy = "CanEdit")]
         [HttpDelete("{id:int}")]
         public IActionResult Delete(int id)
         {
