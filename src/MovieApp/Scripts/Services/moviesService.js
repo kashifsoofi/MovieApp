@@ -3,11 +3,11 @@
 
     angular
         .module('moviesServices', ['ngResource'])
-        .factory('Movies', Movies);
+        .factory('Movie', Movie);
         
-    Movies.$inject = ['$resource'];
+    Movie.$inject = ['$resource'];
 
-    function Movies($resource) {
+    function Movie($resource) {
         return $resource('/api/movies/:id');
     }
 })();
