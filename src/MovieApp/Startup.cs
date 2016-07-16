@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNet.Authorization;
-using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.Hosting;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.EntityFramework;
-using Microsoft.Data.Entity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MovieApp.Models;
@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace MovieApp
 {
@@ -33,7 +34,7 @@ namespace MovieApp
         {
             // Register Entity Framework
             services.AddEntityFramework()
-                .AddSqlServer()
+                .AddEntityFrameworkSqlServer()
                 .AddDbContext<MovieAppContext>(options =>options.UseSqlServer(Configuration["Data:DefaultConnection:ConnectionString"]));
 
             // Add ASP.NET Identity
@@ -113,6 +114,13 @@ namespace MovieApp
         }
 
         // Entry point for the application.
-        public static void Main(string[] args) => WebApplication.Run<Startup>(args);
+        public static void Main(string[] args)
+        {
+            var host = new WebHostBuilder()
+                .UseIISIntegration()
+                .UseStartup<Startup>()
+                .Build();
+            host.Run();
+        }
     }
 }

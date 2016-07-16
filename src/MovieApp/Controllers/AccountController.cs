@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
 using MovieApp.Models;
 
 // For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
@@ -30,7 +30,7 @@ namespace MovieApp.Controllers
         public async Task<IActionResult> Login(LoginViewModel login, string returnUrl = null)
         {
             var signInResult = await _signInManager.PasswordSignInAsync(login.UserName, login.Password, false, false);
-            if (signInResult == SignInResult.Success)
+            if (signInResult == Microsoft.AspNetCore.Identity.SignInResult.Success)
             {
                 return Redirect("/home");
             }

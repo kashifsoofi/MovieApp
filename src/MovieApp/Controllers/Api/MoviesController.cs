@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using MovieApp.Models;
-using Microsoft.AspNet.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
 // For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -32,7 +32,7 @@ namespace MovieApp.Controllers.Api
             var movie = _dbContext.Movies.FirstOrDefault(m => m.Id == id);
             if (movie == null)
             {
-                return new HttpNotFoundResult();
+                return new NotFoundResult();
             }
             else
             {
@@ -71,7 +71,7 @@ namespace MovieApp.Controllers.Api
             var movie = _dbContext.Movies.FirstOrDefault(m => m.Id == id);
             _dbContext.Movies.Remove(movie);
             _dbContext.SaveChanges();
-            return new HttpStatusCodeResult(200);
+            return new StatusCodeResult(200);
         }
     }
 }
