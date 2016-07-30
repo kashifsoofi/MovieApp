@@ -1,79 +1,100 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MovieApp.Models;
-using System;
-using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+using Newtonsoft.Json.Serialization;
 
 namespace MovieApp
 {
     public class Startup
     {
-        public static IConfiguration Configuration { get; set; }
-
         public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
-                .AddEnvironmentVariables();
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
+
+            if (env.IsDevelopment())
+            {
+                // For more details on using the user secret store see http://go.microsoft.com/fwlink/?LinkID=532709
+                //builder.AddUserSecrets();
+            }
+
+            builder.AddEnvironmentVariables();
             Configuration = builder.Build();
         }
+
+        public IConfigurationRoot Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit http://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            // Register Entity Framework
-            services.AddEntityFramework()
-                .AddEntityFrameworkSqlServer()
-                .AddDbContext<MovieAppContext>(options =>options.UseSqlServer(Configuration["Data:DefaultConnection:ConnectionString"]));
+            // Add framework services.
+            services.AddDbContext<MoviesAppContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            // Add ASP.NET Identity
             services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<MovieAppContext>();
+                .AddEntityFrameworkStores<MoviesAppContext>()
+                .AddDefaultTokenProviders();
 
             services.Configure<AuthorizationOptions>(options =>
                 options.AddPolicy("CanEdit", policy => policy.RequireClaim("CanEdit", "true"))
             );
 
-            services.AddMvc();
+            services.AddMvc()
+                .AddJsonOptions(options =>
+                {
+                    options.SerializerSettings.ContractResolver = new DefaultContractResolver();
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
+            loggerFactory.AddConsole();
+
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                app.UseDatabaseErrorPage();
+                app.UseBrowserLink();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+            }
+
             app.UseDefaultFiles();
             app.UseStaticFiles();
-            //app.UseIISPlatformHandler();
 
             app.UseIdentity();
 
-            // Add MVC to the request pipeline.
-            app.UseMvc();
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
-
-                // Uncomment the following line to add a route for porting Web API 2 controllers.
-                // routes.MapWebApiRoute("DefaultApi", "api/{controller}/{id?}");
             });
             CreateSampleData(app.ApplicationServices).Wait();
         }
 
         private static async Task CreateSampleData(IServiceProvider applicationServices)
         {
-            using (var dbContext = applicationServices.GetService<MovieAppContext>())
+            using (var dbContext = applicationServices.GetService<MoviesAppContext>())
             {
                 var sqlServerDatabase = dbContext.Database;
                 if (sqlServerDatabase != null)
@@ -108,19 +129,8 @@ namespace MovieApp
                         };
                         await userManager.CreateAsync(bob, "P@ssw0rd");
                     }
-
                 }
             }
-        }
-
-        // Entry point for the application.
-        public static void Main(string[] args)
-        {
-            var host = new WebHostBuilder()
-                .UseIISIntegration()
-                .UseStartup<Startup>()
-                .Build();
-            host.Run();
         }
     }
 }

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MovieApp.Models;
-using Microsoft.AspNetCore.Authorization;
 
 // For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -13,9 +13,9 @@ namespace MovieApp.Controllers.Api
     [Route("api/[controller]")]
     public class MoviesController : Controller
     {
-        private readonly MovieAppContext _dbContext;
+        private readonly MoviesAppContext _dbContext;
 
-        public MoviesController(MovieAppContext dbContext)
+        public MoviesController(MoviesAppContext dbContext)
         {
             _dbContext = dbContext;
         }
