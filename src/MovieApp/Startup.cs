@@ -45,7 +45,7 @@ namespace MovieApp
         {
             // Add framework services.
             services.AddDbContext<MoviesAppContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<MoviesAppContext>()
@@ -96,40 +96,11 @@ namespace MovieApp
         {
             using (var dbContext = applicationServices.GetService<MoviesAppContext>())
             {
-                var sqlServerDatabase = dbContext.Database;
-                if (sqlServerDatabase != null)
-                {
-                    // Create database in user root (c:\users\your name)
-                    if (await sqlServerDatabase.EnsureCreatedAsync())
-                    {
-                        // add some movies
-                        var movies = new List<Movie>
-                        {
-                            new Movie {Title="Star Wars", Director="Lucas"},
-                            new Movie {Title="King Kong", Director="Jackson"},
-                            new Movie {Title="Memento", Director="Nolan"}
-                        };
-                        movies.ForEach(m => dbContext.Movies.Add(m));
+                var database = dbContext.Database;
+                database.Migrate();
 
-                        // add some users
-                        var userManager = applicationServices.GetService<UserManager<ApplicationUser>>();
-
-                        // add editor user
-                        var stephen = new ApplicationUser
-                        {
-                            UserName = "Admin"
-                        };
-                        var result = await userManager.CreateAsync(stephen, "P@ssw0rd");
-                        await userManager.AddClaimAsync(stephen, new Claim("CanEdit", "true"));
-
-                        // add normal user
-                        var bob = new ApplicationUser
-                        {
-                            UserName = "Viewer"
-                        };
-                        await userManager.CreateAsync(bob, "P@ssw0rd");
-                    }
-                }
+                var userManager = applicationServices.GetService<UserManager<ApplicationUser>>();
+                await dbContext.EnsureSeedData(userManager);
             }
         }
     }
